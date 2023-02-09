@@ -1,11 +1,18 @@
 #!/bin/bash
 # local_repo.sh [image] [mount point]
-
-if [ $# -eq 0 ]; then
-  echo use: local_repo.sh [image] [mount point]
-  echo example: local_repo.sh CentOS-8.2.iso /repos/CentOS82
-  exit 1
+###################################################################
+usage(){
+  cat <<EOF
+Usage: local_repo.sh [image] [mount point]
+Example: local_repo.sh CentOS-8.2.iso /repos/CentOS82
+EOF
+  exit
+}
+if [[ $# -eq 0 ]]
+then
+  usage
 fi
+###################################################################
 
 mkdir -p $2
 mount -o loop $1 $2
