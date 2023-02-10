@@ -40,13 +40,13 @@ readarray -t servers < $1
 
 # assign date, log start time
 task_date=$(date "+%y%m%d%H")
-rule =  | tee -a $task_date.log
+rule = | tee -a $task_date.log
 echo "[ job started at $(date) ]" | tee -a $task_date.log
 
 # loop over servers
 args=("$@")
 for ip in ${servers[@]}; do
-  rule | tee -a $task_date.log
+  rule = | tee -a $task_date.log
   # password check for retry next pw
   pwi=2
   pw=${args[$pwi]}
@@ -60,10 +60,10 @@ for ip in ${servers[@]}; do
   # get server info
   host_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip hostname)
   os_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip cat /etc/*release | grep PRETTY_NAME | cut -d '=' -f2 | tr -d '"')
-  echo "HOSTNAME : "$host_name  | tee -a $task_date.log
-  echo "IP : "$ip | tee -a $task_date.log
-  echo "OS : "$os_name | tee -a $task_date.log
-  echo "COMMAND : "$2 | tee -a $task_date.log
+  echo -e "HOSTNAME : "$host_name  | tee -a $task_date.log
+  echo -e "IP\t : "$ip | tee -a $task_date.log
+  echo -e "OS\t : "$os_name | tee -a $task_date.log
+  echo -e "COMMAND\t : "$2 | tee -a $task_date.log
   rule | tee -a $task_date.log
 
   if [ "$ok" != "ok" ]; then
@@ -73,6 +73,7 @@ for ip in ${servers[@]}; do
   # execute command
   sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip $2 | tee -a $task_date.log
 done
+rule = | tee -a $task_date.log
 
 # show log
 less $task_date.log
