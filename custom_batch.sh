@@ -39,7 +39,7 @@ fi
 readarray -t servers < $1
 
 # assign date, log start time
-task_date=$(date "+%y%m%d%H")
+task_date=$(date "+%y%m%d%H%M")
 rule = | tee -a $task_date.log
 echo "[ job started at $(date) ]" | tee -a $task_date.log
 
