@@ -24,9 +24,9 @@ rulem ()  {
 ###################################################################
 usage(){
   cat <<EOF
-Usage: custom_batch.sh [command] [password]...
-Example: custom_batch.sh 'yum -y install telnet' '1q2w3e' 
-Example: custom_batch.sh 'yum -y install telnet' '1q2w3e' '4r5t6y'
+Usage: custom_batch.sh [server ip list] [command] [password]...
+Example: custom_batch.sh songdo_list 'yum -y install telnet' '1q2w3e' 
+Example: custom_batch.sh songdo_list 'yum -y install telnet' '1q2w3e' '4r5t6y'
 EOF
   exit
 }
@@ -51,7 +51,7 @@ for ip in ${servers[@]}; do
   pwi=2
   pw=${args[$pwi]}
   ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
-  while [ "$ok" != "ok" ] || [ $pwi -lt $(($#-2)) ]; do
+  while [ "$ok" != "ok" ] && [ $pwi -le $(($#-2)) ]; do
     ((pwi++))
     pw=${args[$pwi]}
     ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
