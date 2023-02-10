@@ -49,11 +49,11 @@ for ip in ${servers[@]}; do
   rule = | tee -a $task_date.log
   # password check for retry next pw
   pwi=2
-  pw=${args[$pwi]}
+  pw="${args[$pwi]}"
   ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
   while [ "$ok" != "ok" ] && [ $pwi -le $(($#-2)) ]; do
     ((pwi++))
-    pw=${args[$pwi]}
+    pw="${args[$pwi]}"
     ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
   done
 
