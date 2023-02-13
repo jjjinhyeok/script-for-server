@@ -59,21 +59,23 @@ for ip in ${servers[@]}; do
   done
 
   # get server info
+  echo "[ SERVER INFO ]" | tee -a $task_date.log
   host_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip hostname)
   os_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip cat /etc/*release | grep PRETTY_NAME | cut -d '=' -f2 | tr -d '"')
-  cpu_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip mpstat | tail -1 | awk '{print 100-$NF}')
-  mem_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip free -m | grep 'Mem' | awk '{ print 100-$7/$2*100 }')
-  disk_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip df | sed 's/%//g' | awk '{ if ($5 > 90 && $1 != "/dev/sr0" ) print $1 "\t" $5 "%\t" $6}')
-  msg_log=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip cat /var/log/messages | grep -Ei 'invalid|no|error|critical|fail|fault|warning|problem|unexpected|false|bad|deny|denied|inappropriate|illegal|broken|too\smany|dead|die|corrupt|memory' | tail -n 100)
-
   echo -e "HOSTNAME : "$host_name  | tee -a $task_date.log
   echo -e "IP\t : "$ip | tee -a $task_date.log
   echo -e "OS\t : "$os_name | tee -a $task_date.log
+
   echo "[ RESOURCE USAGE ]" | tee -a $task_date.log
+  cpu_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip mpstat | tail -1 | awk '{print 100-$NF}')
+  mem_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip free -m | grep 'Mem' | awk '{ print 100-$7/$2*100 }')
+  disk_usage=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip df | sed 's/%//g' | awk '{ if ($5 > 90 && $1 != "/dev/sr0" ) print $1 "\t" $5 "%\t" $6}')
   echo -e "CPU\t : "$cpu_usage"%" | tee -a $task_date.log
   echo -e "MEMORY\t : "$mem_usage"%" | tee -a $task_date.log
   echo "$disk_usage" | tee -a $task_date.log
+
   echo "[ MESSAGE LOG ]" | tee -a $task_date.log
+  msg_log=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip cat /var/log/messages | grep -Ei 'invalid|no|error|critical|fail|fault|warning|problem|unexpected|false|bad|deny|denied|inappropriate|illegal|broken|too\smany|dead|die|corrupt|memory' | tail -n 100)
   echo "$msg_log" | tee -a $task_date.log
 
   if [ "$ok" != "ok" ]; then
