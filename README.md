@@ -1,4 +1,4 @@
 # script-for-server
 
 # to do
-daily result 
+failed to result

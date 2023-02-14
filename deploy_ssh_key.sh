@@ -1,8 +1,8 @@
 #!/bin/bash 
 ###################################################################
-#Script Name : custom_batch.sh
+#Script Name : deploy_ssh_key
 #Description : batch processing with custom command 
-#Args : [server ip list] [command] [password]...
+#Args : [server ip list] [password]...
 #Author : Kim Jinhyeok
 #Email : snare909@gmail.com
 ###################################################################
@@ -13,14 +13,19 @@ rule () {
 }
 ## Print horizontal ruler with message
 rulem ()  {
+	if [ $# -eq 0 ]; then
+		echo "Usage: rulem MESSAGE [RULE_CHARACTER]"
+		return 1
+	fi
+	# Fill line with ruler character ($2, default "-"), reset cursor, move 2 cols right, print message
+  # $ rulem "[ How about that? ]"
 	printf -v _hr "%*s" $(tput cols) && echo -en ${_hr// /${2--}} && echo -e "\r\033[2C$1"
 }
 ###################################################################
 usage(){
   cat <<EOF
-Usage: $0 [server ip list] [command] [password]...
-Example: $0 server_list 'yum -y install telnet' '1q2w3e' 
-Example: $0 server_list 'yum -y install telnet' '1q2w3e' '4r5t6y'
+Usage: $0 [server ip list] [password]...
+Example: $0 server_list '1q2w3e' '4r5t6y'
 EOF
   exit
 }
@@ -42,10 +47,10 @@ args=("$@")
 for ip in ${servers[@]}; do
   rule = | tee -a $task_date.log
   # password check for retry next pw
-  pwi=2
+  pwi=1
   pw="${args[$pwi]}"
   ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
-  while [ "$ok" != "ok" ] && [ $pwi -le $(($#-2)) ]; do
+  while [ "$ok" != "ok" ] && [ $pwi -le $(($#-1)) ]; do
     ((pwi++))
     pw="${args[$pwi]}"
     ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
@@ -57,15 +62,18 @@ for ip in ${servers[@]}; do
   echo -e "HOSTNAME : "$host_name  | tee -a $task_date.log
   echo -e "IP\t : "$ip | tee -a $task_date.log
   echo -e "OS\t : "$os_name | tee -a $task_date.log
-  echo -e "COMMAND\t : "$2 | tee -a $task_date.log
   rule | tee -a $task_date.log
 
   if [ "$ok" != "ok" ]; then
     echo "SSH LOGIN FAILED !!!" | tee -a $task_date.log
+    rule * | tee -a $task_date.log
+    continue
   fi
 
-  # execute command
-  sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip $2 | tee -a $task_date.log
+  # deploy pub key
+  pubKey="$HOME/.ssh/id_rsa.pub"
+  result=$(sshpass -p$pw ssh-copy-id -i $pubKey root@$ip)
+  echo $result | tee -a $task_date.log
 done
 rule = | tee -a $task_date.log
 
