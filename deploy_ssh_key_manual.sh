@@ -1,8 +1,8 @@
 #!/bin/bash 
 ###################################################################
-#Script Name : deploy_ssh_key.sh
+#Script Name : deploy_ssh_key_manual.sh
 #Description : batch processing with custom command 
-#Args : [server ip list] [password]...
+#Args : [server ip list]
 #Author : Kim Jinhyeok
 #Email : snare909@gmail.com
 ###################################################################
@@ -24,8 +24,8 @@ rulem ()  {
 ###################################################################
 usage(){
   cat <<EOF
-Usage: $0 [server ip list] [password]...
-Example: $0 server_list '1q2w3e' '4r5t6y'
+Usage: $0 [server ip list]
+Example: $0 server_list
 EOF
   exit
 }
@@ -43,37 +43,13 @@ rule = | tee -a $task_date.log
 echo "[ job started at $(date) : $0 ]" | tee -a $task_date.log
 
 # loop over servers
-args=("$@")
+pubKey="$HOME/.ssh/id_rsa.pub"
 for ip in ${servers[@]}; do
   rule = | tee -a $task_date.log
-  # password check for retry next pw
-  pwi=1
-  pw="${args[$pwi]}"
-  ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
-  while [ "$ok" != "ok" ] && [ $pwi -le $(($#-1)) ]; do
-    ((pwi++))
-    pw="${args[$pwi]}"
-    ok=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
-  done
-
-  # get server info
-  host_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip hostname)
-  os_name=$(sshpass -p$pw ssh -o StrictHostKeyChecking=no root@$ip cat /etc/*release | grep PRETTY_NAME | cut -d '=' -f2 | tr -d '"')
-  echo -e "HOSTNAME : "$host_name  | tee -a $task_date.log
   echo -e "IP\t : "$ip | tee -a $task_date.log
-  echo -e "OS\t : "$os_name | tee -a $task_date.log
+  ssh-copy-id -i $pubKey root@$ip
+  #echo $result | tee -a $task_date.log
   rule | tee -a $task_date.log
-
-  if [ "$ok" != "ok" ]; then
-    echo "SSH LOGIN FAILED !!!" | tee -a $task_date.log
-    rule * | tee -a $task_date.log
-    continue
-  fi
-
-  # deploy pub key
-  pubKey="$HOME/.ssh/id_rsa.pub"
-  result=$(sshpass -p$pw ssh-copy-id -i $pubKey root@$ip)
-  echo $result | tee -a $task_date.log
 done
 rule = | tee -a $task_date.log
 

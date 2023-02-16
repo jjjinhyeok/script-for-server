@@ -75,7 +75,7 @@ for ip in ${servers[@]}; do
   # resource
   cpu_usage=$(sshpass ssh -o StrictHostKeyChecking=no root@$ip mpstat | tail -1 | awk '{print 100-$NF}')
   mem_usage=$(sshpass ssh -o StrictHostKeyChecking=no root@$ip free -m | grep 'Mem' | awk '{ print 100-$7/$2*100 }')
-  disk_usage=$(sshpass ssh -o StrictHostKeyChecking=no root@$ip df | sed 's/%//g' | awk '{ if ($5 > 90 && $1 != "/dev/sr0" ) print $1 "\t" $5 "%\t" $6}')
+  disk_usage=$(sshpass ssh -o StrictHostKeyChecking=no root@$ip df | sed 's/%//g' | awk '{ if ($5 > 90 && $1 != "/dev/sr0" && $1 != "/dev/loop0") print $1 "\t" $5 "%\t" $6}')
   #printRes $cpu_usage $mem_usage "$disk_usage" | tee -a $task_date.log
 
   echo "[ MESSAGE LOG ]" | tee -a $task_date.log
