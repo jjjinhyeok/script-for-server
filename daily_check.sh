@@ -61,7 +61,7 @@ for ip in ${servers[@]}; do
   ok=$(sshpass ssh -o StrictHostKeyChecking=no root@$ip 'echo ok')
   if [ "$ok" != "ok" ]; then
     rule = | tee -a $task_date.log
-    echo -e "IP\t : "$ip
+    echo -e "IP\t : "$ip | tee -a $task_date.log
     echo "SSH LOGIN FAILED !!!" | tee -a $task_date.log
     rule = | tee -a $task_date.log
     continue;
