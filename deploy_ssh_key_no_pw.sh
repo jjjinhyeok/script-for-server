@@ -1,7 +1,7 @@
 #!/bin/bash 
 ###################################################################
 #Script Name : deploy_ssh_key_manual.sh
-#Description : batch processing with custom command 
+#Description : deploy ssh key manually
 #Args : [server ip list]
 #Author : Kim Jinhyeok
 #Email : snare909@gmail.com

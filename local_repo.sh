@@ -37,7 +37,7 @@ while true; do
             echo "gpgcheck=0" >> $repo_cfg
             break;;
         [Nn]* ) 
-            echo "[local-repo]" >> $repo_cfg
+            echo "[local-repo]" > $repo_cfg
             echo "name=Local Repository" >> $repo_cfg
             echo "baseurl=file://$2" >> $repo_cfg
             echo "enabled=1" >> $repo_cfg
